@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   let cardArray = [];
   const gameBoard = document.getElementById("gameBoard");
+  const levelDisplay = document.getElementById("level");
+  const scoreDisplay = document.getElementById("score");
+  let cardsChosen = [];
+  let cardsChosenId = [];
+  let cardsWon = [];
+  let level = 1;
+  let score = 0;
 
   function createCardArray(numPairs) {
     let array = [];
@@ -12,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createBoard() {
-    cardArray = createCardArray(2); // Start with 2 pairs for simplicity
+    cardArray = createCardArray(level + 1); // Increase pairs with level
     gameBoard.innerHTML = "";
     gameBoard.style.gridTemplateColumns = `repeat(${Math.ceil(
       Math.sqrt(cardArray.length)
@@ -41,8 +48,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function flipCard() {
     const cardId = this.getAttribute("data-id");
-    this.classList.add("show");
-    this.innerHTML = cardArray[cardId].img;
+    if (cardsChosen.length < 2 && !cardsChosenId.includes(cardId)) {
+      cardsChosen.push(cardArray[cardId].name);
+      cardsChosenId.push(cardId);
+      this.classList.add("show");
+      this.innerHTML = cardArray[cardId].img;
+
+      if (cardsChosen.length === 2) {
+        setTimeout(checkForMatch, 500);
+      }
+    }
+  }
+
+  function checkForMatch() {
+    const cards = document.querySelectorAll(".card");
+    const optionOneId = cardsChosenId[0];
+    const optionTwoId = cardsChosenId[1];
+
+    if (cardsChosen[0] === cardsChosen[1]) {
+      cards[optionOneId].classList.add("matched");
+      cards[optionTwoId].classList.add("matched");
+      cardsWon.push(cardsChosen);
+      score += 10;
+    } else {
+      cards[optionOneId].classList.remove("show");
+      cards[optionTwoId].classList.remove("show");
+      cards[optionOneId].innerHTML = "";
+      cards[optionTwoId].innerHTML = "";
+      score -= 5;
+    }
+
+    cardsChosen = [];
+    cardsChosenId = [];
+    scoreDisplay.textContent = `Score: ${score}`;
+
+    if (cardsWon.length === cardArray.length / 2) {
+      setTimeout(levelUp, 500);
+    }
+  }
+
+  function levelUp() {
+    level++;
+    levelDisplay.textContent = `Level: ${level}`;
+    cardsWon = [];
+    createBoard();
   }
 
   createBoard();
