@@ -3,11 +3,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const gameBoard = document.getElementById("gameBoard");
   const levelDisplay = document.getElementById("level");
   const scoreDisplay = document.getElementById("score");
+  const timerDisplay = document.getElementById("timer");
+  const restartButton = document.getElementById("restartButton");
   let cardsChosen = [];
   let cardsChosenId = [];
   let cardsWon = [];
   let level = 1;
   let score = 0;
+  let canPlay = false;
 
   function createCardArray(numPairs) {
     let array = [];
@@ -34,8 +37,23 @@ document.addEventListener("DOMContentLoaded", () => {
       gameBoard.appendChild(card);
     }
 
-    // Hide cards after a short delay to allow player to memorize them
-    setTimeout(hideCards, 3000);
+    startCountdown(5); // Set timer for memorizing cards
+  }
+
+  function startCountdown(seconds) {
+    canPlay = false;
+    timerDisplay.textContent = `Memorize the cards... ${seconds}`;
+    let countdown = setInterval(() => {
+      seconds--;
+      if (seconds > 0) {
+        timerDisplay.textContent = `Memorize the cards... ${seconds}`;
+      } else {
+        clearInterval(countdown);
+        timerDisplay.textContent = "Go!";
+        hideCards();
+        canPlay = true;
+      }
+    }, 1000);
   }
 
   function hideCards() {
@@ -47,6 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function flipCard() {
+    if (!canPlay) return;
+
     const cardId = this.getAttribute("data-id");
     if (cardsChosen.length < 2 && !cardsChosenId.includes(cardId)) {
       cardsChosen.push(cardArray[cardId].name);
@@ -93,6 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
     cardsWon = [];
     createBoard();
   }
+
+  function restartGame() {
+    level = 1;
+    score = 0;
+    levelDisplay.textContent = `Level: ${level}`;
+    scoreDisplay.textContent = `Score: ${score}`;
+    cardsWon = [];
+    createBoard();
+  }
+
+  restartButton.addEventListener("click", restartGame);
 
   createBoard();
 });
