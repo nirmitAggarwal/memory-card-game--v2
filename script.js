@@ -5,47 +5,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const scoreDisplay = document.getElementById("score");
   const timerDisplay = document.getElementById("timer");
   const restartButton = document.getElementById("restartButton");
-  let cardsChosen = [];
-  let cardsChosenId = [];
-  let cardsWon = [];
-  let level = 1;
-  let score = 0;
-  let canPlay = false;
+  let cardsChosen = [],
+    cardsChosenId = [],
+    cardsWon = [],
+    level = 1,
+    score = 0,
+    canPlay = false;
 
   function createCardArray(numPairs) {
     let array = [];
     for (let i = 1; i <= numPairs; i++) {
-      array.push({ name: i.toString(), img: i.toString() });
-      array.push({ name: i.toString(), img: i.toString() });
+      array.push(
+        { name: i.toString(), img: i.toString() },
+        { name: i.toString(), img: i.toString() }
+      );
     }
     return array.sort(() => 0.5 - Math.random());
   }
 
   function createBoard() {
-    cardArray = createCardArray(level + 1); // Increase pairs with level
+    cardArray = createCardArray(level + 1);
     gameBoard.innerHTML = "";
-    gameBoard.style.gridTemplateColumns = `repeat(${Math.ceil(
-      Math.sqrt(cardArray.length)
-    )}, 100px)`;
+    const size = Math.ceil(Math.sqrt(cardArray.length));
+    gameBoard.style.gridTemplateColumns = `repeat(${size}, minmax(100px, 1fr))`;
 
-    for (let i = 0; i < cardArray.length; i++) {
-      const card = document.createElement("div");
-      card.setAttribute("class", "card show");
-      card.setAttribute("data-id", i);
-      card.innerHTML = cardArray[i].img;
-      card.addEventListener("click", flipCard);
-      gameBoard.appendChild(card);
-    }
+    cardArray.forEach((card, i) => {
+      const cardElem = document.createElement("div");
+      cardElem.className =
+        "card rounded cursor-pointer flex items-center justify-center text-2xl text-transparent h-24 w-24";
+      cardElem.setAttribute("data-id", i);
+      cardElem.addEventListener("click", flipCard);
+      gameBoard.appendChild(cardElem);
+    });
 
-    startCountdown(5); // Set timer for memorizing cards
+    startCountdown(5);
   }
 
   function startCountdown(seconds) {
     canPlay = false;
     timerDisplay.textContent = `Memorize the cards... ${seconds}`;
     let countdown = setInterval(() => {
-      seconds--;
-      if (seconds > 0) {
+      if (--seconds > 0) {
         timerDisplay.textContent = `Memorize the cards... ${seconds}`;
       } else {
         clearInterval(countdown);
@@ -57,8 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function hideCards() {
-    const cards = document.querySelectorAll(".card");
-    cards.forEach((card) => {
+    document.querySelectorAll(".card").forEach((card) => {
       card.classList.remove("show");
       card.innerHTML = "";
     });
@@ -82,9 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function checkForMatch() {
     const cards = document.querySelectorAll(".card");
-    const optionOneId = cardsChosenId[0];
-    const optionTwoId = cardsChosenId[1];
-
+    const [optionOneId, optionTwoId] = cardsChosenId;
     if (cardsChosen[0] === cardsChosen[1]) {
       cards[optionOneId].classList.add("matched");
       cards[optionTwoId].classList.add("matched");
@@ -97,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
       cards[optionTwoId].innerHTML = "";
       score -= 5;
     }
-
     cardsChosen = [];
     cardsChosenId = [];
     scoreDisplay.textContent = `Score: ${score}`;
